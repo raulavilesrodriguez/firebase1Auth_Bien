@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -33,7 +34,7 @@ import com.example.firebase1.R.drawable as AppIcon
 
 @Composable
 fun TasksScreen(
-    openScreen: (String) -> Unit,
+    openScreen: (String) -> Unit = {},
     viewModel: TasksViewModel = hiltViewModel()
 ){
     val tasks = viewModel.tasks.collectAsStateWithLifecycle(emptyList())
@@ -82,22 +83,17 @@ fun TasksScreenContent(
                 .fillMaxWidth()
                 .fillMaxHeight()
         ) {
-            ActionToolbar(
-                title = AppText.tasks,
-                modifier = Modifier.toolbarActions(),
-                primaryActionIcon = AppIcon.ic_stats,
-                primaryAction = { onStatsClick(openScreen) },
-                secondaryActionIcon = AppIcon.ic_settings,
-                secondaryAction = { onSettingsClick(openScreen) }
-            )
+
             Spacer(modifier = Modifier.smallSpacer())
             LazyColumn(
                 contentPadding = innerPadding
             ) {
-                item {
-                    Text(
-                        text = stringResource(AppText.tasks),
-                        modifier = Modifier.padding(32.dp)
+                items(tasks, key = { it.id }) { taskItem ->
+                    TaskItem(
+                        task = taskItem,
+                        options = options,
+                        onCheckChange = { onTaskCheckChange(taskItem) },
+                        onActionClick = { action -> onTaskActionClick(openScreen, taskItem, action) }
                     )
                 }
             }

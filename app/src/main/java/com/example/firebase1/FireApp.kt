@@ -31,7 +31,7 @@ import com.example.firebase1.screens.settings.SettingsScreen
 import com.example.firebase1.screens.sign_up.SignUpScreen
 import com.example.firebase1.screens.splash.SplashScreen
 import com.example.firebase1.screens.stats.StatsScreen
-import com.example.firebase1.screens.task.TasksScreen
+import com.example.firebase1.screens.task.NavigationWrapperUI
 import com.example.firebase1.ui.theme.Firebase1Theme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -126,7 +126,11 @@ fun NavGraphBuilder.fireGraph(appState: FireAppState){
     }
 
     composable(TASKS_SCREEN) {
-        TasksScreen(openScreen = { route -> appState.navigate(route) })
+        NavigationWrapperUI(
+            restartApp = { route -> appState.clearAndNavigate(route) },
+            openScreen = { route -> appState.navigate(route) },
+            onTaskClick = {}
+        )
     }
 
 }

@@ -1,6 +1,7 @@
 package com.example.firebase1.screens.splash
 
 import androidx.compose.runtime.mutableStateOf
+import com.example.firebase1.LOGIN_SCREEN
 import com.example.firebase1.SETTINGS_SCREEN
 import com.example.firebase1.SPLASH_SCREEN
 import com.example.firebase1.TASKS_SCREEN
@@ -27,7 +28,7 @@ class SplashViewModel @Inject constructor(
     fun onAppStart(openAndPopUp: (String, String) -> Unit) {
 
         showError.value = false
-        if (accountService.hasUser) openAndPopUp(SETTINGS_SCREEN, SPLASH_SCREEN)
+        if (accountService.hasUser) openAndPopUp(LOGIN_SCREEN, SPLASH_SCREEN)
         else createAnonymousAccount(openAndPopUp)
     }
 
