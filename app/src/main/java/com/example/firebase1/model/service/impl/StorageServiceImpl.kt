@@ -1,5 +1,6 @@
 package com.example.firebase1.model.service.impl
 
+import android.util.Log
 import com.example.firebase1.model.Priority
 import com.example.firebase1.model.Task
 import com.example.firebase1.model.service.AccountService
@@ -35,7 +36,8 @@ constructor(
                 firestore.collection(TASK_COLLECTION)
                     .whereEqualTo(USER_ID_FIELD, user.id)
                     .orderBy(CREATED_AT_FIELD, Query.Direction.DESCENDING)
-                    .dataObjects()
+                    .dataObjects<Task>()
+                    .also { Log.d("TasksFlow", "Tasks fetched for user ${user.id}") }
             }
 
     override suspend fun getTask(taskId: String): Task? =

@@ -8,6 +8,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -22,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.example.firebase1.model.Task
+import com.example.firebase1.screens.edit_task.EditTaskScreen
 import com.example.firebase1.screens.settings.SettingsScreen
 import com.example.firebase1.screens.stats.StatsScreen
 import com.example.firebase1.screens.task.navigation.TaskDestination
@@ -34,7 +35,6 @@ private val WINDOW_WIDTH_LARGE = 1200.dp
 fun NavigationWrapperUI(
     restartApp: (String) -> Unit,
     openScreen: (String) -> Unit,
-    onTaskClick: (Task) -> Unit,
 ){
     var selectedDestination : TaskDestination by remember {
         mutableStateOf(TaskDestination.Tasks)
@@ -66,18 +66,22 @@ fun NavigationWrapperUI(
         layoutType = navLayoutType
     ){
         when(selectedDestination){
-            TaskDestination.Tasks -> TasksDestination(openScreen)
+            TaskDestination.Tasks -> TasksDestination(
+                onAddClick = {selectedDestination = TaskDestination.Add}
+            )
             TaskDestination.Settings -> SettingsDestination(restartApp, openScreen)
             TaskDestination.Stats -> StatsDestination()
+            TaskDestination.Add -> AddDestination(
+                onNavigateToTasks = {selectedDestination = TaskDestination.Tasks}
+            )
         }
-
     }
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun TasksDestination(
-    openScreen: (String) -> Unit,
+    onAddClick: () -> Unit
 ){
     val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
 
@@ -91,11 +95,24 @@ fun TasksDestination(
         listPane = {
             AnimatedPane {
                 TasksScreen(
-                    openScreen = openScreen
+                    openScreen = { task ->
+                        var id = 0
+                        if(task.id != ""){ id = task.id.toInt()}
+                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id)
+                    },
+                    onAddClick = onAddClick,
                 )
             }
         },
-        detailPane = {}
+        detailPane = {
+            AnimatedPane {
+                EditTaskScreen(
+                    popUpScreen = {
+                        navigator.navigateTo(ListDetailPaneScaffoldRole.List)
+                    }
+                )
+            }
+        }
     )
 }
 
@@ -138,6 +155,33 @@ fun StatsDestination(){
         listPane = {
             AnimatedPane {
                 StatsScreen()
+            }
+        },
+        detailPane = {}
+    )
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun AddDestination(
+    onNavigateToTasks: () -> Unit
+){
+    val navigator = rememberListDetailPaneScaffoldNavigator<Long>()
+
+    BackHandler(navigator.canNavigateBack()) {
+        navigator.navigateBack()
+    }
+
+    ListDetailPaneScaffold(
+        directive = navigator.scaffoldDirective,
+        value = navigator.scaffoldValue,
+        listPane = {
+            AnimatedPane {
+                EditTaskScreen(
+                    popUpScreen = {
+                        onNavigateToTasks()
+                    }
+                )
             }
         },
         detailPane = {}

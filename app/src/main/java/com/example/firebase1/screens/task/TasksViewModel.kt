@@ -1,10 +1,7 @@
 package com.example.firebase1.screens.task
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import com.example.firebase1.EDIT_TASK_SCREEN
-import com.example.firebase1.SETTINGS_SCREEN
-import com.example.firebase1.STATS_SCREEN
-import com.example.firebase1.TASK_ID
 import com.example.firebase1.model.Task
 import com.example.firebase1.model.service.LogService
 import com.example.firebase1.model.service.StorageService
@@ -22,6 +19,11 @@ class TasksViewModel @Inject constructor(
     val options = mutableStateOf<List<String>>(listOf())
 
     val tasks = storageService.tasks
+    val task1 = mutableStateOf(Task())
+
+    init {
+        Log.d("TASKSS", "TASKSS in ViewModel: $tasks")
+    }
 
     fun loadTaskOptions() {
         val hasEditOption = configurationService.isShowTaskEditButtonConfig
@@ -32,18 +34,17 @@ class TasksViewModel @Inject constructor(
         launchCatching { storageService.update(task.copy(completed = !task.completed)) }
     }
 
-    fun onAddClick(openScreen: (String) -> Unit) = openScreen(EDIT_TASK_SCREEN)
-
-    fun onSettingsClick(openScreen: (String) -> Unit) = openScreen(SETTINGS_SCREEN)
-
-    fun onStatsClick(openScreen: (String) -> Unit) = openScreen(STATS_SCREEN)
-
-    fun onTaskActionClick(openScreen: (String) -> Unit, task: Task, action: String) {
+    fun onTaskActionClick(openScreen: (Task) -> Unit, task: Task, action: String) {
         when (TaskActionOption.getByTitle(action)) {
-            TaskActionOption.EditTask -> openScreen("$EDIT_TASK_SCREEN?$TASK_ID={${task.id}}")
+            TaskActionOption.EditTask -> setSelectedTask(task, openScreen)
             TaskActionOption.ToggleFlag -> onFlagTaskClick(task)
             TaskActionOption.DeleteTask -> onDeleteTaskClick(task)
         }
+    }
+
+    fun setSelectedTask(task: Task, openScreen: (Task) -> Unit){
+        task1.value = task
+        openScreen(task)
     }
 
     private fun onFlagTaskClick(task: Task) {

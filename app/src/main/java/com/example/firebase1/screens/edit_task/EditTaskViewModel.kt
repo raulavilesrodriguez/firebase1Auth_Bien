@@ -23,12 +23,10 @@ class EditTaskViewModel @Inject constructor(
 ) : FireViewModel(logService) {
     val task = mutableStateOf(Task())
 
-    init {
-        val taskId = savedStateHandle.get<String>(TASK_ID)
-        if (taskId != null) {
-            launchCatching {
-                task.value = storageService.getTask(taskId.idFromParameter()) ?: Task()
-            }
+
+    fun setTask(t: Task){
+        launchCatching {
+            task.value = t
         }
     }
 

@@ -128,8 +128,7 @@ fun NavGraphBuilder.fireGraph(appState: FireAppState){
     composable(TASKS_SCREEN) {
         NavigationWrapperUI(
             restartApp = { route -> appState.clearAndNavigate(route) },
-            openScreen = { route -> appState.navigate(route) },
-            onTaskClick = {}
+            openScreen = { route -> appState.navigate(route) }
         )
     }
 

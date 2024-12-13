@@ -1,6 +1,6 @@
 package com.example.firebase1.screens.edit_task
 
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import com.example.firebase1.common.ext.spacer
 import com.example.firebase1.common.ext.toolbarActions
 import com.example.firebase1.model.Priority
 import com.example.firebase1.model.Task
+import com.example.firebase1.screens.task.TasksViewModel
 import com.example.firebase1.ui.theme.Firebase1Theme
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -34,10 +36,13 @@ import com.example.firebase1.R.string as AppText
 @Composable
 fun EditTaskScreen(
     popUpScreen: () -> Unit,
-    viewModel: EditTaskViewModel = hiltViewModel()
+    viewModel: EditTaskViewModel = hiltViewModel(),
+    viewModelTaskView : TasksViewModel = hiltViewModel()
 ){
+    val task1 by viewModelTaskView.task1
+    LaunchedEffect(viewModel) {viewModel.setTask(task1)}
     val task by viewModel.task
-    val activity = LocalContext.current as AppCompatActivity
+    val activity = LocalContext.current as ComponentActivity
 
     EditTaskScreenContent(
         task = task,
@@ -65,7 +70,7 @@ fun EditTaskScreenContent(
     onTimeChange: (Int, Int) -> Unit,
     onPriorityChange: (String) -> Unit,
     onFlagToggle: (String) -> Unit,
-    activity: AppCompatActivity?
+    activity: ComponentActivity?
 ) {
     Column(
         modifier = modifier
@@ -101,7 +106,7 @@ private fun CardEditors(
     task: Task,
     onDateChange: (Long) -> Unit,
     onTimeChange: (Int, Int) -> Unit,
-    activity: AppCompatActivity?
+    activity: ComponentActivity?
 ) {
     RegularCardEditor(AppText.date, AppIcon.ic_calendar, task.dueDate, Modifier.card()) {
         showDatePicker(activity, onDateChange)
@@ -131,20 +136,22 @@ private fun CardSelectors(
     }
 }
 
-private fun showDatePicker(activity: AppCompatActivity?, onDateChange: (Long) -> Unit) {
+private fun showDatePicker(activity: ComponentActivity?, onDateChange: (Long) -> Unit) {
     val picker = MaterialDatePicker.Builder.datePicker().build()
 
     activity?.let {
-        picker.show(it.supportFragmentManager, picker.toString())
+        val fragmentManager = (it as androidx.fragment.app.FragmentActivity).supportFragmentManager
+        picker.show(fragmentManager, picker.toString())
         picker.addOnPositiveButtonClickListener { timeInMillis -> onDateChange(timeInMillis) }
     }
 }
 
-private fun showTimePicker(activity: AppCompatActivity?, onTimeChange: (Int, Int) -> Unit) {
+private fun showTimePicker(activity: ComponentActivity?, onTimeChange: (Int, Int) -> Unit) {
     val picker = MaterialTimePicker.Builder().setTimeFormat(TimeFormat.CLOCK_24H).build()
 
     activity?.let {
-        picker.show(it.supportFragmentManager, picker.toString())
+        val fragmentManager = (it as androidx.fragment.app.FragmentActivity).supportFragmentManager
+        picker.show(fragmentManager, picker.toString())
         picker.addOnPositiveButtonClickListener { onTimeChange(picker.hour, picker.minute) }
     }
 }

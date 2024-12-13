@@ -12,5 +12,6 @@ enum class TaskDestination(
 ) {
     Stats(AppText.stats, AppIcon.ic_stats),
     Settings(AppText.settings, AppIcon.ic_settings),
-    Tasks(AppText.tasks, AppIcon.ic_task)
+    Tasks(AppText.tasks, AppIcon.ic_task),
+    Add(AppText.add, AppIcon.ic_add)
 }

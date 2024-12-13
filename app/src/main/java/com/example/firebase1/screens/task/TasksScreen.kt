@@ -1,5 +1,6 @@
 package com.example.firebase1.screens.task
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +36,8 @@ import com.example.firebase1.R.drawable as AppIcon
 
 @Composable
 fun TasksScreen(
-    openScreen: (String) -> Unit = {},
+    openScreen: (Task) -> Unit,
+    onAddClick: () -> Unit,
     viewModel: TasksViewModel = hiltViewModel()
 ){
     val tasks = viewModel.tasks.collectAsStateWithLifecycle(emptyList())
@@ -43,15 +46,14 @@ fun TasksScreen(
     TasksScreenContent(
         tasks = tasks.value,
         options = options,
-        onAddClick = viewModel::onAddClick,
-        onStatsClick = viewModel::onStatsClick,
-        onSettingsClick = viewModel::onSettingsClick,
+        onAddClick = onAddClick,
         onTaskCheckChange = viewModel::onTaskCheckChange,
         onTaskActionClick = viewModel::onTaskActionClick,
+        setSelectedTask = viewModel::setSelectedTask,
         openScreen = openScreen
     )
 
-
+    LaunchedEffect(viewModel) { viewModel.loadTaskOptions() }
 }
 
 @Composable
@@ -59,17 +61,19 @@ fun TasksScreenContent(
     modifier: Modifier = Modifier,
     tasks: List<Task>,
     options: List<String>,
-    onAddClick: ((String) -> Unit) -> Unit,
-    onStatsClick: ((String) -> Unit) -> Unit,
-    onSettingsClick: ((String) -> Unit) -> Unit,
+    onAddClick: () -> Unit,
     onTaskCheckChange: (Task) -> Unit,
-    onTaskActionClick: ((String) -> Unit, Task, String) -> Unit,
-    openScreen: (String) -> Unit
+    onTaskActionClick: ((Task) -> Unit, Task, String) -> Unit,
+    setSelectedTask: (Task,(Task)-> Unit) -> Unit,
+    openScreen: (Task) -> Unit
 ){
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onAddClick(openScreen) },
+                onClick = {
+                    onAddClick()
+                    setSelectedTask(Task(), openScreen)
+                          },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = modifier.padding(16.dp)
@@ -88,6 +92,7 @@ fun TasksScreenContent(
             LazyColumn(
                 contentPadding = innerPadding
             ) {
+                Log.d("OJOOO tasks", "TASKS: $tasks")
                 items(tasks, key = { it.id }) { taskItem ->
                     TaskItem(
                         task = taskItem,
@@ -118,10 +123,9 @@ fun TaskScreenPreview(){
             tasks = listOf(task),
             options = options,
             onAddClick = { },
-            onStatsClick = { },
-            onSettingsClick = { },
             onTaskCheckChange = { },
             onTaskActionClick = { _, _, _ -> },
+            setSelectedTask = {_, _ ->},
             openScreen = { }
         )
     }
